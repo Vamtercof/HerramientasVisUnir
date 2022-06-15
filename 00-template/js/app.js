@@ -37,16 +37,18 @@ const g = svg
   .append("g")
   .attr("transform", `translate(${margins.left}, ${margins.top})`)
 
-const load = async (variable = "Periodo") => {
+const load = async (variable = "Deuda") => {
   // Carga de Datos
   data = await d3.csv("Deuda_publica_trimestral.csv", d3.autoType)
+  console.log(data)
 
   // Accessor
-  const yAccessor = (d) => d[variable]
+  const yAccessor = (d) => d[variable] 
   const xAccessor = (d) => d.Año
+  const zAccesor = (d) => d.Periodo
 
   data.sort((a, b) => yAccessor(b) - yAccessor(a))
-
+  console.log(data)
   // Escaladores
   const y = d3
     .scaleLinear()
@@ -89,7 +91,7 @@ const load = async (variable = "Periodo") => {
     .attr("x", ancho / 2)
     .attr("y", -15)
     .classed("titulo", true)
-    .text(`${variable} Publica de Espania`)
+    .text(`Deuda Publica de Espania`)
 
   // Ejes
   const xAxis = d3.axisBottom(x)
