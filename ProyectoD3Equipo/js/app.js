@@ -100,7 +100,7 @@ const load = async () => {
     .attr("x", ancho / 2)
     .attr("y", -15)
     .classed("titulo", true)
-    .text(`Deuda Publica de Espania`)
+    .text(`Deuda Pública de España`)
 
   // Ejes
   const xAxis = d3.axisBottom(x)
