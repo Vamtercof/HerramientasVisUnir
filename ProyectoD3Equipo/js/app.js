@@ -1,5 +1,6 @@
 // Selecciones
 const graf = d3.select("#graf")
+const metrica = d3.select("#metrica")
 
 // Dimensiones
 const anchoTotal = +graf.style("width").slice(0, -2)
@@ -13,8 +14,6 @@ const margins = {
 }
 const ancho = anchoTotal - margins.left - margins.right
 const alto = altoTotal - margins.top - margins.bottom
-
-// Escaladores
 
 // Elementos gráficos (layers)
 const svg = graf
@@ -116,10 +115,10 @@ const g = svg
 */
 const draw = async (variable = "Año") => {
   // Carga de Datos
-  data = await d3.csv("mercado_inmobiliario.csv", d3.autoType)
+  data = await d3.csv("mdo_inmb.csv", d3.autoType)
 
-   console.log(data)
-  // console.log(Object.keys(data[0]).slice(1))
+   //console.log(data)
+   console.log(Object.keys(data[0]).slice(1))
   metrica
     .selectAll("option")
     .data(Object.keys(data[0]).slice(1))
@@ -129,7 +128,7 @@ const draw = async (variable = "Año") => {
     .text((d) => d)
 
   // Accessor
-  const xAccessor = (d) => d.Tienda
+  const xAccessor = (d) => d.Periodo
 
   // Escaladores
   const y = d3.scaleLinear().range([alto, 0])
