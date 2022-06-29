@@ -1,6 +1,7 @@
 // Selecciones
 const graf = d3.select("#graf")
 const metrica = d3.select("#metrica")
+const ddyear = d3.select("#ddYear")
 
 // Dimensiones
 const anchoTotal = +graf.style("width").slice(0, -2)
@@ -113,15 +114,28 @@ const g = svg
   const yAxisGroup = g.append("g").classed("axis", true).call(yAxis)
 }
 */
-const draw = async (variable = "Año") => {
+const draw = async (optionSelected = "Compraventa_nueva") => {
   // Carga de Datos
   data = await d3.csv("mdo_inmb.csv", d3.autoType)
+  
+   //optionSelected para extraer el año
+  var Years = data.map((i) => {
+    return i.Año
+  })
+  Years = Years.filter((item, index) => Years.indexOf(item) === index);
+  //llenar el ddl del año
+   ddyear
+    .selectAll("option")
+    .data(Years)
+    .enter()
+    .append("option")
+    .attr("value", (d) => d)
+    .text((d) => d)
 
-   //console.log(data)
-   console.log(Object.keys(data[0]).slice(1))
+  //llenar el ddl del resto de las opcones
   metrica
     .selectAll("option")
-    .data(Object.keys(data[0]).slice(1))
+    .data(Object.keys(data[0]).slice(2))
     .enter()
     .append("option")
     .attr("value", (d) => d)
@@ -136,9 +150,6 @@ const draw = async (variable = "Año") => {
     .scaleOrdinal()
     .domain(Object.keys(data[0]).slice(1))
     .range(d3.schemeTableau10)
-
-  // console.log(data)
-  // console.log(d3.map(data, xAccessor))
 
   const x = d3.scaleBand().range([0, ancho]).paddingOuter(0.2).paddingInner(0.1)
 
@@ -156,17 +167,38 @@ const draw = async (variable = "Año") => {
     .classed("axis", true)
   const yAxisGroup = g.append("g").classed("axis", true)
 
-  const render = (variable) => {
+  const render = () => {
+    const yearSelected = document.getElementById("ddYear").value
+    const optionSelected = document.getElementById("metrica").value
+    /*const dataxYear = data.map((a) => {
+      if(a.Año == yearSelected){
+        const obj = {
+          Año: a.Año,
+          Periodo: a.Periodo,
+          Compraventa_nueva: a.Compraventa_nueva,
+          Compraventa_usadas: a.Compraventa_usadas,
+          Total_compraventa: a.Total_compraventa,
+          Precio_m2: a.Precio_m2,
+          Hipotecas: a.Hipotecas,
+          Deuda_familias: a.Deuda_familias
+        }
+        return obj;
+      }
+    });*/
+    const dataxYear = data.filter(r => r.Año == yearSelected)
+    console.log(dataxYear)
+    
     // Accesores
-    const yAccessor = (d) => d[variable]
-    data.sort((a, b) => yAccessor(b) - yAccessor(a))
+    const yAccessor = (d) => d[optionSelected]
+    
+    //data.sort((a, b) => yAccessor(b) - yAccessor(a))
 
     // Escaladores
-    y.domain([0, d3.max(data, yAccessor)])
-    x.domain(d3.map(data, xAccessor))
+    y.domain([0, d3.max(dataxYear, yAccessor)])
+    x.domain(d3.map(dataxYear, xAccessor))
 
     // Rectángulos (Elementos)
-    const rect = g.selectAll("rect").data(data, xAccessor)
+    const rect = g.selectAll("rect").data(dataxYear, xAccessor)
     rect
       .enter()
       .append("rect")
@@ -184,10 +216,10 @@ const draw = async (variable = "Año") => {
       .attr("width", x.bandwidth())
       .attr("height", (d) => alto - y(yAccessor(d)))
       .attr("fill", (d) =>
-        xAccessor(d) == "Satélite" ? "#f00" : color(variable)
+        xAccessor(d) == "Satélite" ? "#f00" : color(optionSelected)
       )
 
-    const et = etiquetas.selectAll("text").data(data)
+    const et = etiquetas.selectAll("text").data(dataxYear)
     et.enter()
       .append("text")
       .attr("x", (d) => x(xAccessor(d)) + x.bandwidth() / 2)
@@ -200,7 +232,7 @@ const draw = async (variable = "Año") => {
       .text(yAccessor)
 
     // Títulos
-    titulo.text(`${variable} de las Tiendas`)
+    titulo.text(`${optionSelected} de las Tiendas`)
 
     // Ejes
     const xAxis = d3.axisBottom(x)
@@ -209,13 +241,19 @@ const draw = async (variable = "Año") => {
     yAxisGroup.transition().duration(2500).call(yAxis)
   }
 
-  // Eventos
+   // Eventos
+   ddyear.on("change", (e) => {
+    e.preventDefault()
+    // console.log(e.target.value, metrica.node().value)
+    render()
+  })
+
   metrica.on("change", (e) => {
     e.preventDefault()
     // console.log(e.target.value, metrica.node().value)
-    render(e.target.value)
+    render()
   })
-  render(variable)
+  render()
 }
 
 draw()
