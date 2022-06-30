@@ -37,83 +37,6 @@ const g = svg
   .append("g")
   .attr("transform", `translate(${margins.left}, ${margins.top})`)
 
-/*const load = async () => {
-  // Carga de Datos
-  data = await d3.csv("mercado_inmobiliario.csv", d3.autoType)
-  console.log("Data original: ", data);
-  
-  //Limpiar el objeto - Mapear { Deuda(y), Periodo(x = [Año y Periodo]) }
-  data = data.map((i) => {
-    let deuda = i.Deuda.replace(/,/g, '');
-    
-    return {
-      Deuda: parseFloat(deuda) / 1e5,
-      Periodo: `${i.Año} - ${i.Periodo}`
-    }
-  });
-
-  // Accessor
-  const yAccessor = (d) => d.Deuda
-  const xAccessor = (d) => d.Periodo
-
-  data.sort((a, b) => yAccessor(a) - yAccessor(b))
-  console.log("DATA: ", data)
-
-  // Escaladores
-  const y = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, yAccessor)])
-    .range([alto, 0])
-
-  const x = d3
-    .scaleBand()
-    .domain(d3.map(data, xAccessor))
-    .range([0, ancho])
-    .paddingOuter(0.2)
-    .paddingInner(0.1)
-
-  // Rectángulos (Elementos)
-  const rect = g
-    .selectAll("rect")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("x", (d) => x(xAccessor(d)))
-    .attr("y", (d) => y(yAccessor(d)))
-    .attr("width", x.bandwidth())
-    .attr("height", (d) => alto - y(yAccessor(d)))
-    .attr("fill", "#e9c46a")
-
-  console.log("Rect: ", rect)
-
-  const et = g
-    .selectAll("text")
-    .data(data)
-    .enter()
-    .append("text")
-    .attr("x", (d) => x(xAccessor(d)) + x.bandwidth() / 2)
-    .attr("y", (d) => y(yAccessor(d)))
-    .text(yAccessor)
-
-  // Títulos
-  g.append("text")
-    .attr("x", ancho / 2)
-    .attr("y", -15)
-    .classed("titulo", true)
-    .text(`Deuda Pública de España`)
-
-  // Ejes
-  const xAxis = d3.axisBottom(x)
-  const yAxis = d3.axisLeft(y).ticks(8)
-
-  const xAxisGroup = g
-    .append("g")
-    .attr("transform", `translate(0, ${alto})`)
-    .classed("axis", true)
-    .call(xAxis)
-  const yAxisGroup = g.append("g").classed("axis", true).call(yAxis)
-}
-*/
 const draw = async (optionSelected = "Compraventa_nueva") => {
   // Carga de Datos
   data = await d3.csv("mdo_inmb.csv", d3.autoType)
@@ -132,7 +55,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
     .attr("value", (d) => d)
     .text((d) => d)
 
-  //llenar el ddl del resto de las opcones
+  //llenar el ddl del resto de las opciones
   metrica
     .selectAll("option")
     .data(Object.keys(data[0]).slice(2))
@@ -146,6 +69,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
 
   // Escaladores
   const y = d3.scaleLinear().range([alto, 0])
+
   const color = d3
     .scaleOrdinal()
     .domain(Object.keys(data[0]).slice(1))
@@ -168,33 +92,20 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
   const yAxisGroup = g.append("g").classed("axis", true)
 
   const render = () => {
+    //obtener el year seleccionado
     const yearSelected = document.getElementById("ddYear").value
+    //obtener la opcion seleccionada
     const optionSelected = document.getElementById("metrica").value
-    /*const dataxYear = data.map((a) => {
-      if(a.Año == yearSelected){
-        const obj = {
-          Año: a.Año,
-          Periodo: a.Periodo,
-          Compraventa_nueva: a.Compraventa_nueva,
-          Compraventa_usadas: a.Compraventa_usadas,
-          Total_compraventa: a.Total_compraventa,
-          Precio_m2: a.Precio_m2,
-          Hipotecas: a.Hipotecas,
-          Deuda_familias: a.Deuda_familias
-        }
-        return obj;
-      }
-    });*/
+    
+    //filtrando por year
     const dataxYear = data.filter(r => r.Año == yearSelected)
-    console.log(dataxYear)
     
     // Accesores
     const yAccessor = (d) => d[optionSelected]
-    
-    //data.sort((a, b) => yAccessor(b) - yAccessor(a))
 
     // Escaladores
-    y.domain([0, d3.max(dataxYear, yAccessor)])
+    y.domain([-d3.max(dataxYear, yAccessor), d3.max(dataxYear, yAccessor)])
+
     x.domain(d3.map(dataxYear, xAccessor))
 
     // Rectángulos (Elementos)
@@ -203,20 +114,20 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .enter()
       .append("rect")
       .attr("x", (d) => x(xAccessor(d)))
-      .attr("y", (d) => y(0))
+      .attr("y", (d) => y(yAccessor(d)))
       .attr("width", x.bandwidth())
       .attr("height", 0)
       .attr("fill", "green")
       .merge(rect)
       .transition()
       .duration(2500)
-      // .ease(d3.easeBounce)
+      //.ease(d3.easeBounce)
       .attr("x", (d) => x(xAccessor(d)))
-      .attr("y", (d) => y(yAccessor(d)))
+      .attr("y", (d) => Math.abs(y(yAccessor(d))))
       .attr("width", x.bandwidth())
-      .attr("height", (d) => alto - y(yAccessor(d)))
-      .attr("fill", (d) =>
-        xAccessor(d) == "Satélite" ? "#f00" : color(optionSelected)
+      .attr("height", (d) => (alto/2) - y(yAccessor(d)))
+      .attr("fill", (d) => yAccessor(d) < 0 ? "#f00" : "#ff0"
+      //color(optionSelected)
       )
 
     const et = etiquetas.selectAll("text").data(dataxYear)
