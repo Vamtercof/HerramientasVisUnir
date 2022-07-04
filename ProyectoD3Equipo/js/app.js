@@ -114,7 +114,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .enter()
       .append("rect")
       .attr("x", (d) => x(xAccessor(d)))
-      .attr("y", (d) => y(yAccessor(d)))
+      .attr("y", (d) => y(0))
       .attr("width", x.bandwidth())
       .attr("height", 0)
       .attr("fill", "green")
@@ -126,8 +126,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .attr("y", (d) => Math.abs(y(yAccessor(d))))
       .attr("width", x.bandwidth())
       .attr("height", (d) => alto - y(yAccessor(d)))
-      .attr("fill", (d) => color(optionSelected)
-      )
+      .attr("fill", (d) => color(optionSelected))
 
     const et = etiquetas.selectAll("text").data(dataxYear)
     et.enter()
@@ -142,7 +141,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .text(yAccessor)
 
     // Títulos
-    titulo.text(`${optionSelected} del Mercado Inmobiliario en Espana`)
+    titulo.text(`${optionSelected} del Mercado Inmobiliario en España`)
 
     // Ejes
     const xAxis = d3.axisBottom(x)
