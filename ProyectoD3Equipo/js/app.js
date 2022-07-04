@@ -104,7 +104,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
     const yAccessor = (d) => d[optionSelected]
 
     // Escaladores
-    y.domain([-d3.max(dataxYear, yAccessor), d3.max(dataxYear, yAccessor)])
+    y.domain([0, d3.max(dataxYear, yAccessor)])
 
     x.domain(d3.map(dataxYear, xAccessor))
 
@@ -125,9 +125,8 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .attr("x", (d) => x(xAccessor(d)))
       .attr("y", (d) => Math.abs(y(yAccessor(d))))
       .attr("width", x.bandwidth())
-      .attr("height", (d) => (alto/2) - y(yAccessor(d)))
-      .attr("fill", (d) => yAccessor(d) < 0 ? "#f00" : "#ff0"
-      //color(optionSelected)
+      .attr("height", (d) => alto - y(yAccessor(d)))
+      .attr("fill", (d) => color(optionSelected)
       )
 
     const et = etiquetas.selectAll("text").data(dataxYear)
@@ -143,7 +142,7 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
       .text(yAccessor)
 
     // Títulos
-    titulo.text(`${optionSelected} de las Tiendas`)
+    titulo.text(`${optionSelected} del Mercado Inmobiliario en Espana`)
 
     // Ejes
     const xAxis = d3.axisBottom(x)
@@ -155,13 +154,11 @@ const draw = async (optionSelected = "Compraventa_nueva") => {
    // Eventos
    ddyear.on("change", (e) => {
     e.preventDefault()
-    // console.log(e.target.value, metrica.node().value)
     render()
   })
 
   metrica.on("change", (e) => {
     e.preventDefault()
-    // console.log(e.target.value, metrica.node().value)
     render()
   })
   render()
